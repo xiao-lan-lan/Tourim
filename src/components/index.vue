@@ -29,7 +29,7 @@
         <!-- 导航栏 -->
         <ul class="nav">
           <li class="left-nav">
-            <img src="../../static/images/首页/logo_caise_home.png" />
+            <img src="../../static/images/首页/logo_caise_home.png"/>
           </li>
           <li class="li right-first">首页</li>
           <li class="li">文博咨询</li>
