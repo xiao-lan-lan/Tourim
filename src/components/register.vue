@@ -8,22 +8,28 @@
           <img src="../../static/images/logo_dl.png" alt />
           <form>
             <label style="margin:0 66px 0 30px">
-              <input name="Reg" type="radio" value />个人注册
+              <input v-model="registerData.userType" name="Reg" type="radio" value='0' />个人注册
             </label>
 
             <label>
-              <input name="Reg" type="radio" value />机构/团体注册
+              <input v-model="registerData.userType" name="Reg" type="radio" value='1' />机构/团体注册
             </label>
-            <input type="text" value="" placeholder="请输入个人/机构全称" />
-            <select style="width: 320px;height: 36px;margin-bottom: 10px;">>
-              <option style="padding-left: 11px;" v-for="(item,index) in address" :key="index">{{item.address}}</option>
-             
+            <input v-model="registerData.loginName" type="text" placeholder="请输入个人/机构全称" />
+            <select v-model="registerData.provinceId" style="width: 320px;height: 36px;margin-bottom: 10px;">>
+              <option 
+                style="padding-left: 11px;"
+                v-for="(item,index) in address"
+                :key="index"
+                :value="item.provinceId"
+              >
+                {{item.province}}
+              </option>
             </select>
-            <input type="password" value="" placeholder="请输入密码" />
-             <input type="password" value="" placeholder="请确认密码" />
-            <input type="text" value=""  placeholder="请输入你的手机号"/>
-             <input type="text" value=""  placeholder="请输入验证码" style="width:197px; margin-right:12px" /><span>获取验证码</span>
-             <button>注册</button>
+            <input v-model="registerData.pwd" type="password" placeholder="请输入密码" />
+             <input v-model="registerData.param1" type="password" placeholder="请确认密码" />
+            <input v-model="registerData.mobile" type="text"  placeholder="请输入你的手机号"/>
+             <input v-model="registerData.msgCode" type="text"  placeholder="请输入验证码" style="width:197px; margin-right:12px" /><span @click="onSendCode">获取验证码</span>
+             <button @click="onRegister">注册</button>
           </form>
           <p>已有账号，直接登录</p>
         </div>
@@ -36,16 +42,54 @@
 <script>
 import CommonHeader from "./comment/CommonHeader";
 import CommonFooter from "./comment/CommonFooter";
+import { registerPost, sendCodePost } from '../api/use'
 export default {
   name: "register",
  data(){
    return{
-   address:[{address:"北京"},{address:"天津"}]
+    address:[
+      {provinceId: '1', province:"北京"},
+      {provinceId: '2', province:"天津"}
+    ],
+    registerData: {
+      loginName: '', //'帐号名，机构名 必传'
+      pwd: '', // 密码
+      userType: 0, // 用户注册类型，0个人，1机构
+      mobile: '', // 手机
+      provinceId: '1', //'省份编码'
+      province: '', // 省份名
+      msgCode: '', // 临时验证码
+      param1: '', // 确认密码临时参数
+    }
    }
  },
   components: {
     CommonHeader: CommonHeader,
     CommonFooter: CommonFooter
+  },
+  methods: {
+    async onRegister() {
+
+      const provinceFlag = this.address.find(item => item.provinceId === this.registerData.provinceId )
+      if (!provinceFlag) return
+      this.registerData.province = provinceFlag.province
+
+      const formData = new FormData()
+      for (const key in this.registerData) {
+        formData.append(key, this.registerData[key])
+      }
+      const { data } = await registerPost(formData)
+      
+      alert(data.msg)
+      // 判断是否注册成功
+      if (data.code !== 200) return
+
+      this.$router.push('/login')
+    },
+    async onSendCode() {
+      const res = await sendCodePost(this.registerData.mobile)
+      console.log(res)
+    }
   }
 };
 </script>
