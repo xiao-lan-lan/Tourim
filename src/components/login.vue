@@ -65,7 +65,7 @@ export default {
       fd.append("password", this.password);
       fd.append("validateCode", this.verification);
       const { data } = await login(fd);
-      if (data.status!= 0) {
+      if (data.code!= 0) {
         alert(data.msg)
         return
       }
