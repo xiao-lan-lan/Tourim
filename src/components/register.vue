@@ -14,7 +14,7 @@
             <label>
               <input v-model="registerData.userType" name="Reg" type="radio" value='1' />机构/团体注册
             </label>
-            <input v-model="registerData.loginName" type="text" placeholder="请输入个人/机构全称" />
+            <input @input="loginNameChange" v-model="registerData.loginName" type="text" placeholder="请输入个人/机构全称" /><i v-show="userNameIfExist !== '0' " style="color:red;position:absolute;font-size:14px;">该名称已被使用</i>
             <select v-model="registerData.provinceId" style="width: 320px;height: 36px;margin-bottom: 10px;">>
               <option 
                 style="padding-left: 11px;"
@@ -42,11 +42,13 @@
 <script>
 import CommonHeader from "./comment/CommonHeader";
 import CommonFooter from "./comment/CommonFooter";
-import { registerPost, sendCodePost } from '../api/use'
+import { registerPost, sendCodePost, getUserNameIfExistPost } from '../api/use'
 export default {
   name: "register",
  data(){
    return{
+    second: 0,
+    userNameIfExist: "0",
     address:[
       {provinceId: '1', province:"北京"},
       {provinceId: '2', province:"天津"}
@@ -68,6 +70,15 @@ export default {
     CommonFooter: CommonFooter
   },
   methods: {
+    async loginNameChange() {
+      const formData = new FormData()
+      formData.append('name', this.registerData.loginName)
+      const { data } =await getUserNameIfExistPost()
+      
+      if (data.code !== 0) return
+      this.userNameIfExist = data.data
+
+    },
     async onRegister() {
 
       const provinceFlag = this.address.find(item => item.provinceId === this.registerData.provinceId )
@@ -87,8 +98,19 @@ export default {
       this.$router.push('/login')
     },
     async onSendCode() {
-      const res = await sendCodePost(this.registerData.mobile)
-      console.log(res)
+      const formData = new FormData()
+      formData.append('mobile', this.registerData.mobile)
+      const { data } = await sendCodePost(formData)
+      
+      alert(data.msg)
+      // 判断是否注册成功
+      if (data.code !== 0) return
+
+      this.second = 180
+      const intervalFlag = setInterval(()=>{
+        this.second -= 1
+        if (this.isSendCode) clearInterval(intervalFlag)
+      }, 1000 )
     }
   }
 };
