@@ -28,7 +28,7 @@
             <input v-model="registerData.pwd" type="password" placeholder="请输入密码" />
              <input v-model="registerData.param1" type="password" placeholder="请确认密码" />
             <input v-model="registerData.mobile" type="text"  placeholder="请输入你的手机号"/>
-             <input v-model="registerData.msgCode" type="text"  placeholder="请输入验证码" style="width:197px; margin-right:12px" /><span :class="{'send-code': !isSendCode}" @click="onSendCode">{{isSendCode ? '获取验证码' : `${second}秒后重新获取`}}</span>
+             <input v-model="registerData.msgCode" type="text"  placeholder="请输入验证码" style="width:197px; margin-right:12px" /><span @click="onSendCode">获取验证码</span>
              <button @click="onRegister">注册</button>
           </form>
           <p>已有账号，直接登录</p>
@@ -69,11 +69,6 @@ export default {
     CommonHeader: CommonHeader,
     CommonFooter: CommonFooter
   },
-  computed: {
-    isSendCode() {
-      return !this.second
-    }
-  },
   methods: {
     async loginNameChange() {
       const formData = new FormData()
@@ -98,7 +93,7 @@ export default {
       
       alert(data.msg)
       // 判断是否注册成功
-      if (data.code !== 0) return
+      if (data.code !== 200) return
 
       this.$router.push('/login')
     },
@@ -205,11 +200,6 @@ font-weight:500;
 color:rgba(255,255,255,1);
 text-align: center;
 line-height: 36px;
-}
-.content .inner .reg form span.send-code {
-  background-color: #f5f5f5 ;
-  border-color: #ccc;
-  color: #ccc;
 }
 .content .inner .reg form button{
   margin-top: 30px;

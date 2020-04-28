@@ -26,5 +26,5 @@ export const registerPost = formData =>
   request.post('/user/doreg', formData )
 
 // 短信验证码
-export const sendCodePost = formData => 
-  request.post('/user/sendCode', formData )
+export const sendCodePost = mobile => 
+  request.post('/user/sendCode', { mobile } )
