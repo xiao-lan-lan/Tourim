@@ -69,7 +69,6 @@ export default {
     },
     //  验证码
     changeCode() {
-      console.log(11);
       this.src = 'https://miao.inthink.com.cn/api/user/createValidateCode?num='+Math.random()
     }
   },
