@@ -64,8 +64,12 @@ export default {
       fd.append("mobile", this.mobile);
       fd.append("password", this.password);
       fd.append("validateCode", this.verification);
-      const res = await login(fd);
-      //  this.$router.push({ path: 'login', name: 'login'})
+      const { data } = await login(fd);
+      if (data.status!= 0) {
+        alert(data.msg)
+        return
+      }
+       this.$router.push({ path: '/', name: 'index'})
     },
     //  验证码
     changeCode() {
