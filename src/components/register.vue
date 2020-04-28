@@ -14,7 +14,7 @@
             <label>
               <input v-model="registerData.userType" name="Reg" type="radio" value='1' />机构/团体注册
             </label>
-            <input v-model="registerData.loginName" type="text" placeholder="请输入个人/机构全称" />
+            <input @input="loginNameChange" v-model="registerData.loginName" type="text" placeholder="请输入个人/机构全称" /><i v-show="userNameIfExist !== '0' " style="color:red;position:absolute;font-size:14px;">该名称已被使用</i>
             <select v-model="registerData.provinceId" style="width: 320px;height: 36px;margin-bottom: 10px;">>
               <option 
                 style="padding-left: 11px;"
@@ -28,7 +28,7 @@
             <input v-model="registerData.pwd" type="password" placeholder="请输入密码" />
              <input v-model="registerData.param1" type="password" placeholder="请确认密码" />
             <input v-model="registerData.mobile" type="text"  placeholder="请输入你的手机号"/>
-             <input v-model="registerData.msgCode" type="text"  placeholder="请输入验证码" style="width:197px; margin-right:12px" /><span @click="onSendCode">获取验证码</span>
+             <input v-model="registerData.msgCode" type="text"  placeholder="请输入验证码" style="width:197px; margin-right:12px" /><span :class="{'send-code': !isSendCode}" @click="onSendCode">{{isSendCode ? '获取验证码' : `${second}秒后重新获取`}}</span>
              <button @click="onRegister">注册</button>
           </form>
           <p>已有账号，直接登录</p>
@@ -42,11 +42,13 @@
 <script>
 import CommonHeader from "./comment/CommonHeader";
 import CommonFooter from "./comment/CommonFooter";
-import { registerPost, sendCodePost } from '../api/use'
+import { registerPost, sendCodePost, getUserNameIfExistPost } from '../api/use'
 export default {
   name: "register",
  data(){
    return{
+    second: 0,
+    userNameIfExist: "0",
     address:[
       {provinceId: '1', province:"北京"},
       {provinceId: '2', province:"天津"}
@@ -67,7 +69,21 @@ export default {
     CommonHeader: CommonHeader,
     CommonFooter: CommonFooter
   },
+  computed: {
+    isSendCode() {
+      return !this.second
+    }
+  },
   methods: {
+    async loginNameChange() {
+      const formData = new FormData()
+      formData.append('name', this.registerData.loginName)
+      const { data } =await getUserNameIfExistPost()
+      
+      if (data.code !== 0) return
+      this.userNameIfExist = data.data
+
+    },
     async onRegister() {
 
       const provinceFlag = this.address.find(item => item.provinceId === this.registerData.provinceId )
@@ -82,13 +98,24 @@ export default {
       
       alert(data.msg)
       // 判断是否注册成功
-      if (data.code !== 200) return
+      if (data.code !== 0) return
 
       this.$router.push('/login')
     },
     async onSendCode() {
-      const res = await sendCodePost(this.registerData.mobile)
-      console.log(res)
+      const formData = new FormData()
+      formData.append('mobile', this.registerData.mobile)
+      const { data } = await sendCodePost(formData)
+      
+      alert(data.msg)
+      // 判断是否注册成功
+      if (data.code !== 0) return
+
+      this.second = 10
+      const intervalFlag = setInterval(()=>{
+        this.second -= 1
+        if (this.isSendCode) clearInterval(intervalFlag)
+      }, 1000 )
     }
   }
 };
@@ -178,6 +205,11 @@ font-weight:500;
 color:rgba(255,255,255,1);
 text-align: center;
 line-height: 36px;
+}
+.content .inner .reg form span.send-code {
+  background-color: #f5f5f5 ;
+  border-color: #ccc;
+  color: #ccc;
 }
 .content .inner .reg form button{
   margin-top: 30px;

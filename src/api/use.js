@@ -17,10 +17,14 @@ export function createValidateCode () {
   })
 }
 
-// 注册
+// 查询昵称是否用过
+export const getUserNameIfExistPost = formData => 
+  request.post('/user/getUserNameIfExist', formData )
+
+  // 注册
 export const registerPost = formData => 
   request.post('/user/doreg', formData )
 
 // 短信验证码
-export const sendCodePost = mobile => 
-  request.post('/user/sendCode', { mobile } )
+export const sendCodePost = formData => 
+  request.post('/user/sendCode', formData )
